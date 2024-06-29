@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -53,17 +54,48 @@ class SignUpState extends State<SignUp> {
 
       var response = await request.send();
 
+      // Listen to the response's stream and collect data as it comes
+      // response.stream.transform(utf8.decoder).listen((value) {
+      //   print(
+      //       value); // This will print the response body as it is being received
+      // }, onDone: () {
+      //   print('Response received completely.');
+      // }, onError: (error) {
+      //   print('Error receiving response: $error');
+      // });
+
+      debugPrint(response.toString());
+
+      debugPrint('body');
+
+      debugPrint('code ${response.statusCode}');
+
       if (response.statusCode == 200) {
-        // Successfully posted data
-        log('Datas Submitted Successfully');
         String responseBody = await response.stream.bytesToString();
         responseBody = responseBody.trim().replaceAll('"', '');
         await saveResponseInSharedPreferences(responseBody);
-        // Redirect to approval page
+
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const OtpEnteringScreen()),
         );
+        debugPrint('inside 200');
+        debugPrint(responseBody);
+
+        //  Listen to the response's stream and collect data as it comes
+      response.stream.transform(utf8.decoder).listen((value) {
+        print(
+            value); // This will print the response body as it is being received
+      }, onDone: () {
+        print('Response received completely.');
+      }, onError: (error) {
+        print('Error receiving response: $error');
+      });
+        // // Successfully posted data
+        // log('Datas Submitted Successfully');
+
+        // debugPrint(responseBody);
+        // Redirect to approval page
       } else if (response.statusCode == 400) {
         // Error occurred while posting data, but it's expected
         log('Failed to post data: ${response.statusCode}');

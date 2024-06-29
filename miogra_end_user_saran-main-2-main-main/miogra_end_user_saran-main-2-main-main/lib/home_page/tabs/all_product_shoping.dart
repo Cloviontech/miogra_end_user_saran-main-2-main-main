@@ -73,6 +73,9 @@ class _AllProductShopingState extends State<AllProductShoping> {
   Future<dynamic> fetchImages() async {
     String url =
         'https://${ApiServices.ipAddress}/admin/banner_display/shopping';
+
+    debugPrint(
+        'https://${ApiServices.ipAddress}/admin/banner_display/shopping');
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {

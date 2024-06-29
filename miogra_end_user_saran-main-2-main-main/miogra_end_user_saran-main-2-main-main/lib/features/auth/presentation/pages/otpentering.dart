@@ -46,6 +46,9 @@ class OtpEnteringState extends State<OtpEnteringScreen> {
       // Populate form fields
       request.fields['user_otp'] = otp;
 
+      debugPrint('otp $otp');
+      debugPrint('user id : ${prefs.getString("api_response")}');
+
       var response = await request.send();
 
       if (response.statusCode == 200) {
@@ -88,7 +91,7 @@ class OtpEnteringState extends State<OtpEnteringScreen> {
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final url =
-        'http://10.0.2.2:3000/endresend_otp/${prefs.getString("api_response")}';
+        'http://${ApiServices.ipAddress}/endresend_otp/${prefs.getString("api_response")}';
 
     try {
       var request = http.MultipartRequest('POST', Uri.parse(url));
@@ -129,6 +132,7 @@ class OtpEnteringState extends State<OtpEnteringScreen> {
   @override
   void initState() {
     super.initState();
+
     controllers = List.generate(4, (index) => TextEditingController());
     focusNodes = List.generate(4, (index) => FocusNode());
     for (int i = 0; i < controllers.length - 1; i++) {

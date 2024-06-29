@@ -33,6 +33,9 @@ class _AccountState extends State<Account> {
   Future<void> _fetchSingleUsersData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+
+      // prefs.clear();
+
       final userId = prefs.getString("api_response");
 
       if (userId == null) {
@@ -43,11 +46,18 @@ class _AccountState extends State<Account> {
       final response = await http.get(Uri.parse(
           'https://${ApiServices.ipAddress}/single_users_data/$userId'));
 
+      debugPrint('https://${ApiServices.ipAddress}/single_users_data/$userId');
+
+      debugPrint(response.statusCode.toString());
+      debugPrint(response.body.toString());
+
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body) as List<dynamic>;
+
         setState(() {
           _singleUsersData =
               responseData.map((json) => User.fromJson(json)).toList();
+
           _isLoading = false;
         });
       } else {

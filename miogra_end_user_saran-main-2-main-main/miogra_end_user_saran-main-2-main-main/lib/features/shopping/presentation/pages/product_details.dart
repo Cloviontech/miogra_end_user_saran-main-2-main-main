@@ -6,14 +6,17 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:miogra/core/colors.dart';
 import 'package:miogra/core/constants.dart';
+import 'package:miogra/features/food/presentation/pages/food_data/food_data.dart';
 import 'package:miogra/features/profile/pages/wishlist1_srn.dart';
 import 'package:miogra/features/shopping/presentation/pages/go_to_order.dart';
 import 'package:miogra/features/shopping/presentation/widgets/ratings.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'package:miogra/home_page/cart_page.dart';
+import 'package:miogra/models/shopping/get_single_shopproduct.dart';
 import 'package:persistent_shopping_cart/model/cart_model.dart';
 import 'package:persistent_shopping_cart/persistent_shopping_cart.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/api_services.dart';
@@ -120,6 +123,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   Future<dynamic> fetchDataFromListJson() async {
     String url =
         'https://${ApiServices.ipAddress}/get_single_shopproduct/${widget.shopeid}/${widget.productId}';
+
+    debugPrint(
+        'https://${ApiServices.ipAddress}/get_single_shopproduct/${widget.shopeid}/${widget.productId}');
     log(url);
 
     try {
@@ -201,6 +207,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final shoppingCart = context.watch<Fooddata>().productsInMainCart;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -707,6 +715,128 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   //       );
   //     },
   //   );
+  // }
+
+  var shoppingCart;
+
+  List<dynamic> getProducts = [];
+
+  double totalPriceS = 0;
+  List totalPriceCalc = [];
+
+  List<int> quantityOfItems = [];
+
+  calcTotalPrice() {
+    totalPriceS = 0;
+    totalPriceCalc = [];
+    for (var i = 0; i < getProducts.length; i++) {
+      setState(() {
+        totalPriceCalc.add(
+            double.parse(getProducts[i].product!.price!) * quantityOfItems[i]);
+      });
+    }
+    for (var j = 0; j < totalPriceCalc.length; j++) {
+      totalPriceS = totalPriceS + totalPriceCalc[j];
+    }
+  }
+
+
+  
+// get_single_shopproduct
+
+// Li
+
+Future<List<GetSingleShopproduct>> fetchSingleShopProductData() async {
+  final response = await http.get(Uri.parse(
+      'http://${ApiServices.ipAddress}/get_single_shopproduct'));
+
+  if (response.statusCode == 200) {
+    List<dynamic> data = json.decode(response.body);
+
+    
+    return data.map((json) => GetSingleShopproduct.fromJson(json)).toList();
+  } else {
+    throw Exception('Failed to load products');
+  }
+}
+
+  // addToCartProvider () {
+
+  //      setState(() {
+  //                                                   quantityOfItems[index]++;
+  //                                                   calcTotalPrice();
+  //                                                   debugPrint(
+  //                                                       'Incremented ${quantityOfItems[index]}');
+  //                                                 });
+
+  //                                                 // updateQuantity(getProducts[index],
+  //                                                 //     quantityOfItems[index]);
+  //                                                 //
+
+  //                                                 // int listIndexMainCart =
+  //                                                 //     shoppingCart.indexWhere(
+  //                                                 //         (nestedList) =>
+  //                                                 //             nestedList.contains(
+  //                                                 //                 getProducts[
+  //                                                 //                     index]));
+
+  //                                                 int listIndexMainCart =
+  //                                                     shoppingCart.indexWhere(
+  //                                                         (nestedList) =>
+  //                                                             nestedList.contains(
+  //                                                                 getProducts[
+  //                                                                         index]
+  //                                                                     .product!
+  //                                                                     .productId));
+
+  //                                                 debugPrint(
+  //                                                     'listIndexMainCart ${listIndexMainCart}');
+
+  //                                                 debugPrint(
+  //                                                     'sublist.contains(getProducts[index] ${shoppingCart.any((sublist) => sublist.contains(getProducts[index]))}');
+  //                                                 debugPrint(
+  //                                                     'sublist.contains(getProducts[index] ${shoppingCart.any((sublist) => sublist.contains(getProducts[index].product!.productId))}');
+
+  //                                                 shoppingCart.any(
+  //                                                         (sublist) =>
+  //                                                             sublist.contains(
+  //                                                                 getProducts[
+  //                                                                     index]))
+  //                                                     ? (quantityOfItems[
+  //                                                                 index] ==
+  //                                                             0)
+  //                                                         ? shoppingCart
+  //                                                             .removeAt(
+  //                                                                 listIndexMainCart)
+  //                                                         : shoppingCart[
+  //                                                             listIndexMainCart] = [
+  //                                                             getProducts[
+  //                                                                 index],
+  //                                                             quantityOfItems[
+  //                                                                 index]
+  //                                                           ]
+  //                                                     : shoppingCart.add([
+  //                                                         getProducts[
+  //                                                             index],
+  //                                                         quantityOfItems[index]
+  //                                                       ]);
+
+  //                                                 debugPrint(
+  //                                                     'shoppingCart : ${shoppingCart.last[0].product.productId}');
+
+  //                                                 // bool containsValue =
+  //                                                 //     productsInCart.any((sublist) => sublist.contains(product));
+
+  //                                                 // debugPrint(containsValue.toString());
+
+  //                                                 // context.read<Fooddata>().addToCartwithQuantity(productToCart);
+
+  //                                                 debugPrint(
+  //                                                     'shoppingCart : ${shoppingCart.length}');
+
+  //                                                 debugPrint(
+  //                                                     'Added to shoppingCart with qty Successfully');
+
   // }
 
   addToCart() async {

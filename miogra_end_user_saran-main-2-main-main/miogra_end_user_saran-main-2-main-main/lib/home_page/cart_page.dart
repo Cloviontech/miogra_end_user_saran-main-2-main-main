@@ -623,6 +623,8 @@ class _CartViewState extends State<CartView> {
 
     String url = 'https://${ApiServices.ipAddress}/cartlist/$userId';
 
+    debugPrint('https://${ApiServices.ipAddress}/cartlist/$userId');
+
     try {
       final response = await http.get(
         Uri.parse(url),

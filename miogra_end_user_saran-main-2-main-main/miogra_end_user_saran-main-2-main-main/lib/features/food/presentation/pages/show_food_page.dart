@@ -324,7 +324,7 @@ class _ShopeProductViewPageState extends State<ShopeProductViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    final productsCartMain2 = context.watch<Fooddata>().productsInMainCart;
+    final productsCartMain2 = context.watch<Fooddata>().productsInMainCart; 
 
     // final products = context.watch<Shop>().shop;
     // final products = categoryBasedFood;
@@ -586,6 +586,8 @@ class _ShopeProductViewPageState extends State<ShopeProductViewPage> {
                                                       ),
                                                     ),
                                                   ),
+                                                  // Text(quantityOfItems[index]
+                                                  //     .toString()),
                                                   Expanded(
                                                     flex: 3,
                                                     child: Container(
@@ -1186,213 +1188,257 @@ class _ShopeProductViewPageState extends State<ShopeProductViewPage> {
               onPressed: () {
                 log(cartList.toString());
 
-                showModalBottomSheet(
-                  showDragHandle: true,
-                  useSafeArea: true,
-                  context: context,
-                  builder: (context) {
-                    return Column(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: SingleChildScrollView(
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: productsCartMain2.length,
-                              itemBuilder: (context, index) {
-                                return Row(
-                                  children: [
-                                    Column(
-                                      children: [
-                                        SizedBox(
-                                          height: 100,
-                                          width: 100,
-                                          // color: const Color.fromARGB(
-                                          //     255, 249, 227, 253),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child:
-                                                // Image.network(imageUrl.toString()),
-                                                Image.network(
-                                                    productsCartMain2[index][0]
-                                                        .product
-                                                        .primaryImage
-                                                        .toString()
-
-                                                    // categoryBasedFood[index]
-                                                    //     .product!
-                                                    //     .primaryImage
-                                                    //     .toString()
-
-                                                    ),
-                                          ),
-                                        ),
-                                        Row(children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                width: 1,
-                                                color: primaryColor,
-                                              ),
-                                            ),
-                                            alignment: Alignment.center,
-                                            height: 30,
-                                            width: 30,
-                                            child:
-                                                Text(productsCartMain2[index][1]
-                                                        // .product
-                                                        // .primaryImage
-                                                        .toString()
-
-                                                    // quantityOfItems[index]
-                                                    //   .toString(),
-
-                                                    ),
-                                          ),
-                                        ]),
-                                      ],
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.5,
-                                          child: Text(
-                                            // productName
-                                            productsCartMain2[index][0]
-                                                .product
-                                                .modelName
-                                                .toString(),
-                                            // categoryBasedFood[index]
-                                            //     .product!
-                                            //     .modelName
-                                            //     .toString(),
-                                            overflow: TextOverflow.fade,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18,
-                                            ),
-                                          ),
-                                        ),
-                                        Text(
-                                          // '₹$sellingPrice',
-                                          '${int.parse(productsCartMain2[index][0].product.price)}'
-
-                                          // '${productsCartMain2[index][1]}'
-                                          ,
-
-                                          // categoryBasedFood[index]
-                                          //     .product!
-                                          //     .price
-                                          //     .toString(),
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: SizedBox(
-                            // color: Colors.amber,
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: Column(
-                                children: [
-                                  const Row(
-                                    children: [
-                                      Text(
-                                        'Price Details',
-                                        style: TextStyle(fontSize: 20),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Text('Price :'),
-                                      Text('₹$totalPriceS/-'),
-
-                                      // Text('$quantityOfItems')
-                                    ],
-                                  ),
-                                  const Row(
-                                    children: [
-                                      Text('Delivery Fees :'),
-                                      Text('₹50/-'),
-                                    ],
-                                  ),
-                                  const Divider(
-                                    color: Colors.black,
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Text(
-                                        'Order Total :',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                      Text('₹${totalPriceS + 50}/-'),
-                                    ],
-                                  ),
-                                  const Spacer(),
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => AddAddressPage(
-                                            userId: userId,
-                                            edit: false,
-                                            food: true,
-                                            totalPrice: totalPriceS.toInt(),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                          color: primaryColor,
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10))),
-                                      alignment: Alignment.center,
-                                      height: 50,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.8,
-                                      child: const Text(
-                                        'Proceed',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                ],
+                quantityOfItems.reduce((sum, element) => sum + element) == 0
+                    ? showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10),
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                );
+                            title: const Text(
+                              'No Products Selected...!',
+                            ),
+                            // content: const TextField(
+                            //   keyboardType: TextInputType.number,
+                            // ),
+                          );
+                        })
+                    : showModalBottomSheet(
+                        showDragHandle: true,
+                        useSafeArea: true,
+                        context: context,
+                        builder: (context) {
+                          return Column(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: SingleChildScrollView(
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: productsCartMain2.length,
+                                    itemBuilder: (context, index) {
+                                      return Row(
+                                        children: [
+                                          Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 100,
+                                                width: 100,
+                                                // color: const Color.fromARGB(
+                                                //     255, 249, 227, 253),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child:
+                                                      // Image.network(imageUrl.toString()),
+                                                      Image.network(
+                                                          productsCartMain2[
+                                                                  index][0]
+                                                              .product
+                                                              .primaryImage
+                                                              .toString()
+
+                                                          // categoryBasedFood[index]
+                                                          //     .product!
+                                                          //     .primaryImage
+                                                          //     .toString()
+
+                                                          ),
+                                                ),
+                                              ),
+                                              Row(children: [
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                      width: 1,
+                                                      color: primaryColor,
+                                                    ),
+                                                  ),
+                                                  alignment: Alignment.center,
+                                                  height: 30,
+                                                  width: 30,
+                                                  child: Text(
+                                                      productsCartMain2[index]
+                                                              [1]
+                                                          // .product
+                                                          // .primaryImage
+                                                          .toString()
+
+                                                      // quantityOfItems[index]
+                                                      //   .toString(),
+
+                                                      ),
+                                                ),
+                                              ]),
+                                            ],
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.5,
+                                                child: Text(
+                                                  // productName
+                                                  productsCartMain2[index][0]
+                                                      .product
+                                                      .modelName
+                                                      .toString(),
+                                                  // categoryBasedFood[index]
+                                                  //     .product!
+                                                  //     .modelName
+                                                  //     .toString(),
+                                                  overflow: TextOverflow.fade,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 18,
+                                                  ),
+                                                ),
+                                              ),
+                                              Text(
+                                                // '₹$sellingPrice',
+                                                '${int.parse(productsCartMain2[index][0].product.price)}'
+
+                                                // '${productsCartMain2[index][1]}'
+                                                ,
+
+                                                // categoryBasedFood[index]
+                                                //     .product!
+                                                //     .price
+                                                //     .toString(),
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+
+
+
+                              Expanded(
+                                flex: 3,
+                                child: SizedBox(
+                                  // color: Colors.amber,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20),
+                                    child: Column(
+                                      children: [
+                                        const Row(
+                                          children: [
+                                            Text(
+                                              'Price Details',
+                                              style: TextStyle(fontSize: 20),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Text('Price :'),
+                                            Text('₹$totalPriceS/-'),
+
+                                            // Text('$quantityOfItems')
+                                          ],
+                                        ),
+                                        const Row(
+                                          children: [
+                                            Text('Delivery Fees :'),
+                                            Text('₹50/-'),
+                                          ],
+                                        ),
+                                        const Divider(
+                                          color: Colors.black,
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Text(
+                                              'Order Total :',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                            Text('₹${totalPriceS + 50}/-'),
+                                          ],
+                                        ),
+
+                                        // Text(productsCartMain2.fold(
+                                        //     '0', (sum, element) => sum + element)),
+
+                                        // Text('${quantityOfItems.sum),
+
+                                        // int total = numbers.fold(0, (sum, element) => sum + element);
+
+//                                   Text( quantityOfItems.where((element) => element is int).fold(0, (sum, element) => sum + element),
+// ),
+                                        Text(
+                                            '${quantityOfItems.reduce((sum, element) => sum + element)}'),
+
+                                        // myList.where((element) => element is int).fold(0, (sum, element) => sum + element)
+
+                                        const Spacer(),
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    AddAddressPage(
+                                                  userId: userId,
+                                                  edit: false,
+                                                  food: true,
+                                                  totalPrice:
+                                                      totalPriceS.toInt(),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            decoration: const BoxDecoration(
+                                                color: primaryColor,
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10))),
+                                            alignment: Alignment.center,
+                                            height: 50,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.8,
+                                            child: const Text(
+                                              'Proceed',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
 
                 // addProductsToMainCart(context);
 
@@ -1451,6 +1497,9 @@ class _ShopeProductViewPageState extends State<ShopeProductViewPage> {
           ),
         ],
       ),
+    
+    
+    
     );
   }
 

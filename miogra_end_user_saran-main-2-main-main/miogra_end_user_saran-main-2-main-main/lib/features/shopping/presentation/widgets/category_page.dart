@@ -289,6 +289,7 @@ class _CategoryPageState extends State<CategoryPage> {
                             ),
                           ),
                         )
+                    
                       : productBox(
                           imageUrl: imageUrl,
                           pName: productName,

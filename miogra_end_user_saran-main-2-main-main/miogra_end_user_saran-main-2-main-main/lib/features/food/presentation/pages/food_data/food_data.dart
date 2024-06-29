@@ -58,6 +58,19 @@ class Fooddata extends ChangeNotifier {
     notifyListeners();
   }
   // ////////
+
+
+  
+  //////////
+  List<List<dynamic>> _shoppingCart = [];
+  /////////
+  List get shoppingCart => _shoppingCart;
+  // add item to cart
+  void addToShoppingCart(List<List<dynamic>> items) {
+    _shoppingCart.add(items);
+    notifyListeners();
+  }
+  //////////
   
 
 

@@ -3,10 +3,15 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:miogra/core/api_services.dart';
 import 'package:miogra/core/colors.dart';
+import 'package:miogra/features/food/models_foods/category_based_food_model.dart';
 import 'package:miogra/features/food/models_foods/food_get_products_model.dart';
 import 'package:miogra/features/food/models_foods/my_food_data.dart';
 // ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
+import 'package:miogra/features/food/presentation/pages/food_data/food_data.dart';
+import 'package:miogra/features/food/presentation/pages/show_food_page.dart';
+import 'package:miogra/features/profile/pages/add_address_page.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final List<Map<String, dynamic>> CustmyFoodData = [
@@ -55,20 +60,28 @@ class _FoodItemsState extends State<FoodItems> {
 
   List<int> qty = [];
 
-  static List<FoodGetProducts> foodGetProducts = [];
+  // static List<FoodGetProducts> foodGetProducts = [];
+  static List<CategoryBasedFood> foodGetProducts = [];
+
+  // FoodGetProducts
 
   Future<void> fetchFoodGetProducts1(String foodId) async {
     final response = await http.get(
         Uri.parse('http://${ApiServices.ipAddress}/food_get_products/$foodId'));
 
+    debugPrint('http://${ApiServices.ipAddress}/food_get_products/$foodId');
+
     if (response.statusCode == 200) {
       List<dynamic> jsonResponse = json.decode(response.body);
+      debugPrint(jsonResponse.toString());
 
       setState(() {
-        foodGetProducts =
-            jsonResponse.map((data) => FoodGetProducts.fromJson(data)).toList();
+        foodGetProducts = jsonResponse
+            .map((data) => CategoryBasedFood.fromJson(data))
+            .toList();
         loadingFetchFoodGetProducts = false;
       });
+      quantityOfItems = List.generate(foodGetProducts.length, (_) => 0);
 
       // return data.map((json) => FoodGetProducts.fromJson(json)).toList();
     } else {
@@ -102,6 +115,8 @@ class _FoodItemsState extends State<FoodItems> {
     final response = await http
         .get(Uri.parse('http://${ApiServices.ipAddress}/my_food_data/$foodId'));
 
+    debugPrint('http://${ApiServices.ipAddress}/my_food_data/$foodId');
+
     if (response.statusCode == 200) {
       setState(() {
         myFoodData = MyFoodData.fromJson(jsonDecode(response.body));
@@ -128,7 +143,13 @@ class _FoodItemsState extends State<FoodItems> {
     }
   }
 
-  String userId = 'a';
+  String userId = '';
+  Future<void> getUserIdInSharedPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString("api_response").toString();
+    });
+  }
 
   addToCartAllSelectedProductsLoop() {
     for (var i = 0; i < orderedFoods.length; i++) {
@@ -251,10 +272,10 @@ class _FoodItemsState extends State<FoodItems> {
     });
     // totalQuantity = 0;
     for (var i = 0; i < foodGetProducts.length; i++) {
-      print(foodGetProducts[i].product.sellingPrice);
+      print(foodGetProducts[i].product!.sellingPrice);
       setState(() {
         totalQtyBasedPrice
-            .add(foodGetProducts[i].product.sellingPrice.toInt() * qty[i]);
+            .add(foodGetProducts[i].product!.sellingPrice!.toInt() * qty[i]);
 
         totalqty.add(qty[i]);
       });
@@ -283,9 +304,29 @@ class _FoodItemsState extends State<FoodItems> {
   //   });
   // }
 
+  double totalPriceS = 0;
+  List totalPriceCalc = [];
+
+  List<int> quantityOfItems = [];
+
+  calcTotalPrice() {
+    totalPriceS = 0;
+    totalPriceCalc = [];
+    for (var i = 0; i < foodGetProducts.length; i++) {
+      setState(() {
+        totalPriceCalc.add(double.parse(foodGetProducts[i].product!.price!) *
+            quantityOfItems[i]);
+      });
+    }
+    for (var j = 0; j < totalPriceCalc.length; j++) {
+      totalPriceS = totalPriceS + totalPriceCalc[j];
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    getUserIdInSharedPreferences();
     totalQtyBasedPrice1 = 0;
     // futureMyFoodData = fetchMyFoodData(widget.foodId);
     // futureFetchGetProducts = fetchFoodGetProducts(widget.foodId);
@@ -302,6 +343,8 @@ class _FoodItemsState extends State<FoodItems> {
 
   @override
   Widget build(BuildContext context) {
+    final productsCartMain2 = context.watch<Fooddata>().productsInMainCart;
+
     // late int totalQuantity = 0;
 
     // int calcTotalQuantity() {
@@ -606,6 +649,11 @@ class _FoodItemsState extends State<FoodItems> {
                   //   // color: Colors.white,
                   // ),
 
+                  // Text(productsCartMain2[0][1].product.modelName.toString()),
+                  // Text(productsCartMain2[0].length.toString()),
+                  // Text(productsCartMain2.length.toString()),
+                  // Text(quantityOfItems.length.toString()),
+
                   const Padding(
                     padding: EdgeInsets.all(10.0),
                     child: Text(
@@ -647,6 +695,7 @@ class _FoodItemsState extends State<FoodItems> {
 //  Text(foodGetProducts.length.toString()),
 
                                       // Text(foods![index].foodId.toString()),
+
                                       Expanded(
                                         flex: 3,
                                         child: Container(
@@ -660,7 +709,7 @@ class _FoodItemsState extends State<FoodItems> {
                                               image: NetworkImage(
                                                 // foods![index]
                                                 foodGetProducts[index]
-                                                    .product
+                                                    .product!
                                                     .primaryImage
                                                     .toString(),
                                               ),
@@ -679,9 +728,69 @@ class _FoodItemsState extends State<FoodItems> {
                                             children: [
                                               InkWell(
                                                 onTap: () {
-                                                  updateValueDec(index);
+                                                  // updateValueDec(index);
 
-                                                  calcTotalPriceWithResQty();
+                                                  // calcTotalPriceWithResQty();
+
+                                                  quantityOfItems[index] > 0
+                                                      ? setState(() {
+                                                          quantityOfItems[
+                                                              index]--;
+                                                          calcTotalPrice();
+                                                          debugPrint(
+                                                              'decremented ${quantityOfItems[index]}');
+                                                        })
+                                                      : null;
+
+                                                  // updateQuantity(foodGetProducts[index],
+                                                  //     quantityOfItems[index]);
+
+                                                  int listIndexMainCart =
+                                                      productsCartMain2.indexWhere(
+                                                          (nestedList) =>
+                                                              nestedList.contains(
+                                                                  foodGetProducts[
+                                                                      index]));
+
+                                                  debugPrint(
+                                                      'productsCartMain2 : $productsCartMain2');
+
+                                                  productsCartMain2.any(
+                                                          (sublist) =>
+                                                              sublist.contains(
+                                                                  foodGetProducts[
+                                                                      index]))
+                                                      ? (quantityOfItems[
+                                                                  index] ==
+                                                              0)
+                                                          ? productsCartMain2
+                                                              .removeAt(
+                                                                  listIndexMainCart)
+                                                          : productsCartMain2[
+                                                              listIndexMainCart] = [
+                                                              foodGetProducts[
+                                                                  index],
+                                                              quantityOfItems[
+                                                                  index]
+                                                            ]
+                                                      : productsCartMain2.add([
+                                                          foodGetProducts[
+                                                              index],
+                                                          quantityOfItems[index]
+                                                        ]);
+
+                                                  debugPrint(
+                                                      'productsCartMain2 : $productsCartMain2');
+
+                                                  // bool containsValue =
+                                                  //     productsInCart.any((sublist) => sublist.contains(product));
+
+                                                  // debugPrint(containsValue.toString());
+
+                                                  // context.read<Fooddata>().addToCartwithQuantity(productToCart);
+
+                                                  debugPrint(
+                                                      'Added to productsCartMain2 with qty Successfully');
                                                 },
                                                 child: Container(
                                                   decoration:
@@ -717,7 +826,12 @@ class _FoodItemsState extends State<FoodItems> {
                                                 child: Text(
                                                   // _quantity
                                                   //     .toString(),
-                                                  qty[index].toString(),
+                                                  // qty[index].toString(),
+
+                                                  quantityOfItems[index]
+                                                      .toString(),
+                                                  // quantityOfItems.length
+                                                  //     .toString(),
                                                   style: const TextStyle(
                                                       color: Color(0xff870081),
                                                       fontSize: 20,
@@ -727,9 +841,84 @@ class _FoodItemsState extends State<FoodItems> {
                                               ),
                                               GestureDetector(
                                                 onTap: () {
-                                                  updateValueInc(index);
+                                                  // updateValueInc(index);
 
-                                                  calcTotalPriceWithResQty();
+                                                  // calcTotalPriceWithResQty();
+
+                                                  setState(() {
+                                                    quantityOfItems[index]++;
+                                                    calcTotalPrice();
+                                                    debugPrint(
+                                                        'Incremented ${quantityOfItems[index]}');
+                                                  });
+
+                                                  // updateQuantity(foodGetProducts[index],
+                                                  //     quantityOfItems[index]);
+                                                  //
+
+                                                  // int listIndexMainCart =
+                                                  //     productsCartMain2.indexWhere(
+                                                  //         (nestedList) =>
+                                                  //             nestedList.contains(
+                                                  //                 foodGetProducts[
+                                                  //                     index]));
+
+                                                  int listIndexMainCart =
+                                                      productsCartMain2.indexWhere(
+                                                          (nestedList) =>
+                                                              nestedList.contains(
+                                                                  foodGetProducts[
+                                                                          index]
+                                                                      .product!
+                                                                      .productId));
+
+                                                  debugPrint(
+                                                      'listIndexMainCart ${listIndexMainCart}');
+
+                                                  debugPrint(
+                                                      'sublist.contains(foodGetProducts[index] ${productsCartMain2.any((sublist) => sublist.contains(foodGetProducts[index]))}');
+                                                  debugPrint(
+                                                      'sublist.contains(foodGetProducts[index] ${productsCartMain2.any((sublist) => sublist.contains(foodGetProducts[index].product!.productId))}');
+
+                                                  productsCartMain2.any(
+                                                          (sublist) =>
+                                                              sublist.contains(
+                                                                  foodGetProducts[
+                                                                      index]))
+                                                      ? (quantityOfItems[
+                                                                  index] ==
+                                                              0)
+                                                          ? productsCartMain2
+                                                              .removeAt(
+                                                                  listIndexMainCart)
+                                                          : productsCartMain2[
+                                                              listIndexMainCart] = [
+                                                              foodGetProducts[
+                                                                  index],
+                                                              quantityOfItems[
+                                                                  index]
+                                                            ]
+                                                      : productsCartMain2.add([
+                                                          foodGetProducts[
+                                                              index],
+                                                          quantityOfItems[index]
+                                                        ]);
+
+                                                  debugPrint(
+                                                      'productsCartMain2 : ${productsCartMain2.last[0].product.productId}');
+
+                                                  // bool containsValue =
+                                                  //     productsInCart.any((sublist) => sublist.contains(product));
+
+                                                  // debugPrint(containsValue.toString());
+
+                                                  // context.read<Fooddata>().addToCartwithQuantity(productToCart);
+
+                                                  debugPrint(
+                                                      'productsCartMain2 : ${productsCartMain2.length}');
+
+                                                  debugPrint(
+                                                      'Added to productsCartMain2 with qty Successfully');
                                                 },
                                                 child: Container(
                                                   decoration:
@@ -778,8 +967,9 @@ class _FoodItemsState extends State<FoodItems> {
                                             Text(
                                               // "Chiken Manchurian",
                                               foodGetProducts[index]
-                                                  .product
-                                                  .name[0],
+                                                  .product!
+                                                  .modelName
+                                                  .toString(),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
@@ -793,7 +983,7 @@ class _FoodItemsState extends State<FoodItems> {
                                             ),
                                             Text(
                                               // "₹150",
-                                              '₹ ${foodGetProducts[index].product.sellingPrice}',
+                                              '₹ ${foodGetProducts[index].product!.price}',
                                               style: const TextStyle(
                                                   fontSize: 19,
                                                   color: Color(0xE6434343)),
@@ -828,8 +1018,9 @@ class _FoodItemsState extends State<FoodItems> {
                                                                 child: Image.network(
                                                                     foodGetProducts[
                                                                             index]
-                                                                        .product
-                                                                        .primaryImage),
+                                                                        .product!
+                                                                        .primaryImage
+                                                                        .toString()),
                                                               ),
                                                               const SizedBox(
                                                                 height: 50,
@@ -837,8 +1028,9 @@ class _FoodItemsState extends State<FoodItems> {
                                                               Text(
                                                                 foodGetProducts[
                                                                         index]
-                                                                    .product
-                                                                    .otherImages[0],
+                                                                    .product!
+                                                                    .productDescription
+                                                                    .toString(),
                                                               )
                                                             ],
                                                           ),
@@ -850,8 +1042,9 @@ class _FoodItemsState extends State<FoodItems> {
                                                 // temperory used for description
 
                                                 foodGetProducts[index]
-                                                    .product
-                                                    .otherImages[0],
+                                                    .product!
+                                                    .productDescription
+                                                    .toString(),
 
                                                 maxLines: 3,
                                                 overflow: TextOverflow.ellipsis,
@@ -872,93 +1065,484 @@ class _FoodItemsState extends State<FoodItems> {
                           );
                         },
                       ),
+                      // Text(userId),
                     ],
                   ),
                 ],
               ),
       ),
-      bottomNavigationBar: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              style: ButtonStyle(
-                minimumSize: WidgetStateProperty.all(const Size(250, 50)),
-                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0.0),
-                )),
-                backgroundColor: WidgetStateProperty.all(Colors.white),
-              ),
-              onPressed: () {
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //         builder: (context) => const OrderSuccess()));
 
-                bottomDetailsScreen(
-                    context: context,
-                    qtyB: totalqty1,
-                    priceB: totalQtyBasedPrice1,
-                    deliveryB: 50);
-              },
-              child:
-                  // Text(
-                  //   '$totalqty1 Items | ₹ ${totalQtyBasedPrice1}',
-                  //   style: TextStyle(color: Colors.purple, fontSize: 18),
-                  // ),
+      bottomNavigationBar: loadingFetchFoodGetProducts || loadingFetchMyFoodData
+          ? CircularProgressIndicator()
+          : Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      minimumSize:
+                          MaterialStateProperty.all(const Size(250, 50)),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0.0),
+                      )),
+                      backgroundColor: MaterialStateProperty.all(Colors.white),
+                    ),
+                    onPressed: () {
+                      setState(() {});
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => const OrderSuccess()));
 
-                  AutoSizeText(
-                '$totalqty1 Items | ₹ ${totalQtyBasedPrice1 + (totalQtyBasedPrice1 == 0 ? 0 : 0)}',
-                minFontSize: 18,
-                maxFontSize: 24,
-                maxLines: 1, // Adjust this value as needed
-                overflow: TextOverflow.ellipsis, // Handle overflow text
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple,
+                      // bottomDetailsScreen(
+                      //     context: context,
+                      //     qtyB: totalqty1,
+                      //     priceB: totalQtyBasedPrice1,
+                      //     deliveryB: 0);
+                    },
+                    child:
+                        // Text(
+                        //   '$totalqty1 Items | ₹ ${totalQtyBasedPrice1}',
+                        //   style: TextStyle(color: Colors.purple, fontSize: 18),
+                        // ),
+
+                        AutoSizeText(
+                      // '₹$rate',
+                      '${quantityOfItems.reduce((sum, element) => sum + element)} Items : ${totalPriceS.toString()}',
+                      // '$totalqty1 Items | ₹ ${totalQtyBasedPrice1 + (totalQtyBasedPrice1 == 0 ? 0 : 0)}',
+                      minFontSize: 18,
+                      maxFontSize: 24,
+                      maxLines: 1, // Adjust this value as needed
+                      overflow: TextOverflow.ellipsis, // Handle overflow text
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: ElevatedButton(
-              style: ButtonStyle(
-                minimumSize: WidgetStateProperty.all(const Size(250, 50)),
-                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0.0),
-                )),
-                backgroundColor: WidgetStateProperty.all(Colors.purple),
-              ),
-              onPressed: () {
-                print('orderedFoods : $orderedFoods');
+                Expanded(
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      minimumSize:
+                          MaterialStateProperty.all(const Size(250, 50)),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0.0),
+                      )),
+                      backgroundColor: MaterialStateProperty.all(primaryColor),
+                    ),
+                    onPressed: () {
+                      // log(cartList.toString());
 
-                addToCartAllSelectedProductsLoop();
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //         builder: (context) => OrderingFor(
-                //               totalPrice: totalQtyBasedPrice1,
-                //               totalQty: totalqty1,
-                //               selectedFoods: orderedFoods,
-                //               qty: qty, productCategory: 'food',
-                //             )));
+                      quantityOfItems.reduce((sum, element) => sum + element) ==
+                              0
+                          ? showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  ),
+                                  title: const Text(
+                                    'No Products Selected...!',
+                                  ),
+                                  // content: const TextField(
+                                  //   keyboardType: TextInputType.number,
+                                  // ),
+                                );
+                              })
+                          : showModalBottomSheet(
+                              showDragHandle: true,
+                              useSafeArea: true,
+                              context: context,
+                              builder: (context) {
+                                return Column(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: SingleChildScrollView(
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: productsCartMain2.length,
+                                          itemBuilder: (context, index) {
+                                            return Row(
+                                              children: [
+                                                Column(
+                                                  children: [
+                                                    SizedBox(
+                                                      height: 100,
+                                                      width: 100,
+                                                      // color: const Color.fromARGB(
+                                                      //     255, 249, 227, 253),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child:
+                                                            // Image.network(imageUrl.toString()),
+                                                            Image.network(
+                                                                productsCartMain2[
+                                                                        index][0]
+                                                                    .product
+                                                                    .primaryImage
+                                                                    .toString()
 
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //         builder: (context) => MyCart(
-                //               selectedFoods: orderedFoods,
-                //             )));
-              },
-              child: const Text(
-                'Proceed',
-                style: TextStyle(color: Colors.white, fontSize: 24),
-              ),
+                                                                // categoryBasedFood[index]
+                                                                //     .product!
+                                                                //     .primaryImage
+                                                                //     .toString()
+
+                                                                ),
+                                                      ),
+                                                    ),
+                                                    Row(children: [
+                                                      Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border.all(
+                                                            width: 1,
+                                                            color: primaryColor,
+                                                          ),
+                                                        ),
+                                                        alignment:
+                                                            Alignment.center,
+                                                        height: 30,
+                                                        width: 30,
+                                                        child: Text(
+                                                            productsCartMain2[
+                                                                    index][1]
+                                                                // .product
+                                                                // .primaryImage
+                                                                .toString()
+
+                                                            // quantityOfItems[index]
+                                                            //   .toString(),
+
+                                                            ),
+                                                      ),
+                                                    ]),
+                                                  ],
+                                                ),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.5,
+                                                      child: Text(
+                                                        // productName
+                                                        productsCartMain2[index]
+                                                                [0]
+                                                            .product
+                                                            .modelName
+                                                            .toString(),
+                                                        // categoryBasedFood[index]
+                                                        //     .product!
+                                                        //     .modelName
+                                                        //     .toString(),
+                                                        overflow:
+                                                            TextOverflow.fade,
+                                                        style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 18,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      // '₹$sellingPrice',
+                                                      '${int.parse(productsCartMain2[index][0].product.price)}'
+
+                                                      // '${productsCartMain2[index][1]}'
+                                                      ,
+
+                                                      // categoryBasedFood[index]
+                                                      //     .product!
+                                                      //     .price
+                                                      //     .toString(),
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 3,
+                                      child: SizedBox(
+                                        // color: Colors.amber,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20),
+                                          child: Column(
+                                            children: [
+                                              const Row(
+                                                children: [
+                                                  Text(
+                                                    'Price Details',
+                                                    style:
+                                                        TextStyle(fontSize: 20),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  const Text('Price :'),
+                                                  Text('₹$totalPriceS/-'),
+
+                                                  // Text('$quantityOfItems')
+                                                ],
+                                              ),
+                                              const Row(
+                                                children: [
+                                                  Text('Delivery Fees :'),
+                                                  Text('₹50/-'),
+                                                ],
+                                              ),
+                                              const Divider(
+                                                color: Colors.black,
+                                              ),
+                                              Row(
+                                                children: [
+                                                  const Text(
+                                                    'Order Total :',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                      '₹${totalPriceS + 50}/-'),
+                                                ],
+                                              ),
+
+                                              // Text(productsCartMain2.fold(
+                                              //     '0', (sum, element) => sum + element)),
+
+                                              // Text('${quantityOfItems.sum),
+
+                                              // int total = numbers.fold(0, (sum, element) => sum + element);
+
+//                                   Text( quantityOfItems.where((element) => element is int).fold(0, (sum, element) => sum + element),
+// ),
+                                              Text(
+                                                  '${quantityOfItems.reduce((sum, element) => sum + element)}'),
+
+                                              // myList.where((element) => element is int).fold(0, (sum, element) => sum + element)
+
+                                              const Spacer(),
+
+                                              InkWell(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          AddAddressPage(
+                                                        userId: userId,
+                                                        edit: false,
+                                                        food: true,
+                                                        totalPrice:
+                                                            totalPriceS.toInt(),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                                child: Container(
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                          color: primaryColor,
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          10))),
+                                                  alignment: Alignment.center,
+                                                  height: 50,
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.8,
+                                                  child: const Text(
+                                                    'Proceed',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 18,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const Spacer(),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                      // addProductsToMainCart(context);
+
+                      // Navigator.push(context, MaterialPageRoute(builder: (
+                      //   context,
+                      // ) {
+                      //   return const
+
+                      //       // FoodCartPage();
+
+                      //       CartPage1();
+                      // }));
+
+                      // GoToOrder(shopId: shopId, uId: uId, category: category)
+
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (context) => AddAddressPage(
+                      //           userId: userId, edit: false, food: true),
+                      //     ));
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (context) => CartPaymentScreen(
+                      //         productData: cartList,
+                      //         address: '',
+                      //         category: const [],
+                      //         pinCode: '',
+                      //         productId: const [],
+                      //         shopId: '',
+                      //         totalPrice: rate,
+                      //         userId: '',
+                      //         actualPrice: '',
+                      //         discounts: '',
+                      //         totalQuantity: '',
+                      //       ),
+                      //     ));
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => OrderingFor(
+                      //               totalPrice: totalQtyBasedPrice1,
+                      //               totalQty: totalqty1,
+                      //               selectedFoods: orderedFoods,
+                      //               qty: qty,
+                      //               productCategory: 'food',
+                      //               noOfProd: 'single',
+                      //             )));
+                    },
+                    child: const Text(
+                      'Continue',
+                      style: TextStyle(color: Colors.white, fontSize: 24),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
+
+      // bottomNavigationBar: Row(
+      //   children: [
+      //     Expanded(
+      //       child: ElevatedButton(
+      //         style: ButtonStyle(
+      //           minimumSize: WidgetStateProperty.all(const Size(250, 50)),
+      //           shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+      //               RoundedRectangleBorder(
+      //             borderRadius: BorderRadius.circular(0.0),
+      //           )),
+      //           backgroundColor: WidgetStateProperty.all(Colors.white),
+      //         ),
+      //         onPressed: () {
+      //           // Navigator.push(
+      //           //     context,
+      //           //     MaterialPageRoute(
+      //           //         builder: (context) => const OrderSuccess()));
+
+      //           bottomDetailsScreen(
+      //               context: context,
+      //               qtyB: totalqty1,
+      //               priceB: totalQtyBasedPrice1,
+      //               deliveryB: 50);
+      //         },
+      //         child:
+
+      //             // Text(
+      //             //   '$totalqty1 Items | ₹ ${totalQtyBasedPrice1}',
+      //             //   style: TextStyle(color: Colors.purple, fontSize: 18),
+      //             // ),
+
+      //             AutoSizeText(
+      //           '$totalqty1 Items | ₹ ${totalQtyBasedPrice1 + (totalQtyBasedPrice1 == 0 ? 0 : 0)}',
+      //           minFontSize: 18,
+      //           maxFontSize: 24,
+      //           maxLines: 1, // Adjust this value as needed
+      //           overflow: TextOverflow.ellipsis, // Handle overflow text
+      //           style: const TextStyle(
+      //             fontWeight: FontWeight.bold,
+      //             color: Colors.purple,
+      //           ),
+      //         ),
+      //       ),
+      //     ),
+      //     Expanded(
+      //       child: ElevatedButton(
+      //         style: ButtonStyle(
+      //           minimumSize: WidgetStateProperty.all(const Size(250, 50)),
+      //           shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+      //               RoundedRectangleBorder(
+      //             borderRadius: BorderRadius.circular(0.0),
+      //           )),
+      //           backgroundColor: WidgetStateProperty.all(Colors.purple),
+      //         ),
+      //         onPressed: () {
+      //           print('orderedFoods : $orderedFoods');
+
+      //           addToCartAllSelectedProductsLoop();
+      //           // Navigator.push(
+      //           //     context,
+      //           //     MaterialPageRoute(
+      //           //         builder: (context) => OrderingFor(
+      //           //               totalPrice: totalQtyBasedPrice1,
+      //           //               totalQty: totalqty1,
+      //           //               selectedFoods: orderedFoods,
+      //           //               qty: qty, productCategory: 'food',
+      //           //             )));
+
+      //           // Navigator.push(
+      //           //     context,
+      //           //     MaterialPageRoute(
+      //           //         builder: (context) => MyCart(
+      //           //               selectedFoods: orderedFoods,
+      //           //             )));
+      //         },
+      //         child: const Text(
+      //           'Proceed',
+      //           style: TextStyle(color: Colors.white, fontSize: 24),
+      //         ),
+      //       ),
+      //     ),
+      //   ],
+      // ),
     );
   }
 }

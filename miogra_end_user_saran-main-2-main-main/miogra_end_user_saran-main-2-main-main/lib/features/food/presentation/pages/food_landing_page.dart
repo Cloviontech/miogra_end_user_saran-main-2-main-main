@@ -39,6 +39,8 @@ class _FoodLandingPageState extends State<FoodLandingPage> {
 
   Future<dynamic> fetchImages() async {
     String url = 'https://${ApiServices.ipAddress}/admin/banner_display/food';
+
+    debugPrint('https://${ApiServices.ipAddress}/admin/banner_display/food');
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -251,6 +253,10 @@ class _FoodLandingPageState extends State<FoodLandingPage> {
                         ),
                       ),
                     ),
+                    // Text(images2.length.toString()),
+                    // Text(images2[0]),
+
+                    AddsView(images: images2),
 
                     // Container(
                     //   margin: const EdgeInsets.symmetric(horizontal: 20),

@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:miogra/core/colors.dart';
 import 'package:miogra/features/profile/pages/add_address_page.dart';
 import 'package:miogra/features/shopping/presentation/pages/paymentScreen.dart';
+import 'package:miogra/features/shopping/presentation/pages/paymentScreen_for_shop.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/api_services.dart';
 import '../../../auth/presentation/pages/signin.dart';
@@ -127,7 +128,8 @@ class _GoToOrderState extends State<GoToOrder> {
                   MaterialPageRoute(
                     builder: (context) =>
                         // SelectPaymentMethod( cartlist: [], addressIndex: 0, selectedFoods: [],),
-                        PaymentScreen(
+                        // PaymentScreen(
+                        PaymentScreenForShop(
                       shopId: widget.shopId.toString(),
                       productId: widget.productId.toString(),
                       discounts: discount.toString(),
@@ -162,142 +164,153 @@ class _GoToOrderState extends State<GoToOrder> {
                   SizedBox(
                     height: 150,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          height: 150,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              width: 2,
-                              color: const Color.fromARGB(255, 199, 199, 199),
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                widget.link.toString(),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            height: 150,
+                            // width: 100,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 2,
+                                color: const Color.fromARGB(255, 199, 199, 199),
                               ),
-                              fit: BoxFit.contain,
+                              borderRadius: BorderRadius.circular(10),
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                  widget.link.toString(),
+                                ),
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    width: 180,
-                                    child: Text(
-                                      productName,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.fade,
-                                      style: const TextStyle(fontSize: 18),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 1,
-                                      horizontal: 5,
-                                    ),
-                                    decoration: const BoxDecoration(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(5),
-                                      ),
-                                      color: Colors.purple,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          rating.toString(),
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                        const Icon(
-                                          Icons.star,
-                                          color: Colors.white,
-                                          size: 18,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    oldPrice,
-                                    style: const TextStyle(
-                                      decoration: TextDecoration.lineThrough,
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    totalPrice.toString(),
-                                    style: const TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Container(
-                                    color: Colors.green,
-                                    height: 25,
-                                    width: MediaQuery.of(context).size.width *
-                                        0.15,
-                                    child: const Center(
+                        // Expanded(
+                        //   flex: 1,
+                        //   child: SizedBox(
+                        //       // height: 20,
+                        //       ),
+                        // ),
+                        Expanded(
+                          flex: 5,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SizedBox(
+                                      width: 180,
                                       child: Text(
-                                        '30% OFF',
-                                        style: TextStyle(color: Colors.white),
+                                        productName,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.fade,
+                                        style: const TextStyle(fontSize: 18),
                                       ),
                                     ),
-                                  )
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        if (count > 1) {
-                                          // Ensure count is greater than 1 to avoid division by zero
-                                          count--;
-                                          totalPrice = totalPrice - newPrice;
-                                        }
-                                      });
-                                    },
-                                    icon: const Icon(Icons.remove),
-                                  ),
-                                  Text(count.toString()),
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        count++;
-                                        totalPrice = newPrice * count;
-                                        log(totalPrice.toString());
-                                      });
-                                    },
-                                    icon: const Icon(Icons.add),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                    // const SizedBox(
+                                    //   width: 20,
+                                    // ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 1,
+                                        horizontal: 5,
+                                      ),
+                                      decoration: const BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(5),
+                                        ),
+                                        color: Colors.purple,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            rating.toString(),
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                          ),
+                                          const Icon(
+                                            Icons.star,
+                                            color: Colors.white,
+                                            size: 18,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      oldPrice,
+                                      style: const TextStyle(
+                                        decoration: TextDecoration.lineThrough,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                      totalPrice.toString(),
+                                      style: const TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Container(
+                                      color: Colors.green,
+                                      height: 25,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.15,
+                                      child: const Center(
+                                        child: Text(
+                                          '30% OFF',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          if (count > 1) {
+                                            // Ensure count is greater than 1 to avoid division by zero
+                                            count--;
+                                            totalPrice = totalPrice - newPrice;
+                                          }
+                                        });
+                                      },
+                                      icon: const Icon(Icons.remove),
+                                    ),
+                                    Text(count.toString()),
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          count++;
+                                          totalPrice = newPrice * count;
+                                          log(totalPrice.toString());
+                                        });
+                                      },
+                                      icon: const Icon(Icons.add),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -376,7 +389,7 @@ class _GoToOrderState extends State<GoToOrder> {
                                         child: Container(
                                           alignment: Alignment.center,
                                           height: 26,
-                                          width: 80,
+                                          width: 60,
                                           decoration: const BoxDecoration(
                                             color: primaryColor,
                                             borderRadius: BorderRadius.all(
@@ -950,5 +963,4 @@ class _GoToOrderState extends State<GoToOrder> {
       throw Exception('Error fetching data: $e');
     }
   }
-
 }

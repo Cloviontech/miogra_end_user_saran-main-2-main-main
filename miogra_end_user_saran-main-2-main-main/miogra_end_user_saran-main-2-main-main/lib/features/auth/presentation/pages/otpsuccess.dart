@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:miogra/home_page/home_page.dart';
 import 'dart:async';
 
+import 'package:miogra/home_page/home_page_main.dart';
+
 class OtpSuccess extends StatefulWidget {
   const OtpSuccess({super.key});
 
@@ -28,7 +30,11 @@ class _OtpSuccessState extends State<OtpSuccess> with TickerProviderStateMixin {
       () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => const MyHomePage(),
+            builder: (context) => const 
+            
+            // MyHomePage(),
+
+            HomePage(),
           ),
         );
       },

@@ -16,8 +16,8 @@ import 'package:miogra/payment_gateway/razor_pay.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({
+class PaymentScreenForShop extends StatefulWidget {
+  const PaymentScreenForShop({
     super.key,
     required this.shopId,
     required this.productId,
@@ -43,10 +43,10 @@ class PaymentScreen extends StatefulWidget {
   final String category;
 
   @override
-  State<PaymentScreen> createState() => _PaymentScreenState();
+  State<PaymentScreenForShop> createState() => _PaymentScreenState();
 }
 
-class _PaymentScreenState extends State<PaymentScreen> {
+class _PaymentScreenState extends State<PaymentScreenForShop> {
   int orderPlacedSuccess = 0;
   int deliveryCharge = 50;
 
@@ -68,93 +68,93 @@ class _PaymentScreenState extends State<PaymentScreen> {
     // final productsCartMain2 = context.watch<Fooddata>().productsInMainCart;
 
     // List<CategoryBasedFood> foodSelected = [];
-    List<dynamic> foodSelected = [];
+    // List<dynamic> foodSelected = [];
 
-    for (var i = 0; i < productsCartMain2.length; i++) {
-      foodSelected.add(productsCartMain2[i][0]);
-    }
+    // for (var i = 0; i < productsCartMain2.length; i++) {
+    //   foodSelected.add(productsCartMain2[i][0]);
+    // }
 
-    List<int> quantityOfFoodsSelected = [];
+    // List<int> quantityOfFoodsSelected = [];
 
-    for (var i = 0; i < productsCartMain2.length; i++) {
-      quantityOfFoodsSelected.add(productsCartMain2[i][1]);
-    }
+    // for (var i = 0; i < productsCartMain2.length; i++) {
+    //   quantityOfFoodsSelected.add(productsCartMain2[i][1]);
+    // }
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var uidUser = prefs.getString("api_response").toString();
+    // var uidUser = prefs.getString("api_response").toString();
 
-    debugPrint('User Id : $uidUser');
+    // debugPrint('User Id : $uidUser');
 
-    for (var i = 0; i < productsCartMain2.length; i++) {
-      String url =
-          'https://${ApiServices.ipAddress}/enduser_order_create/$uidUser/${productsCartMain2[i][0].productId}/${productsCartMain2[i][0].category}/';
+    // for (var i = 0; i < productsCartMain2.length; i++) {
+    //   String url =
+    //       'https://${ApiServices.ipAddress}/enduser_order_create/$uidUser/${productsCartMain2[i][0].productId}/${productsCartMain2[i][0].category}/';
 
-      // log(widget.userId);
-      // log(widget.productId);
-      // log(widget.category);
+    //   // log(widget.userId);
+    //   // log(widget.productId);
+    //   // log(widget.category);
 
-      log(productsCartMain2[i][0].productId);
-      log(productsCartMain2[i][0].category);
-      log(uidUser);
+    //   log(productsCartMain2[i][0].productId);
+    //   log(productsCartMain2[i][0].category);
+    //   log(uidUser);
 
-      showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: Color.fromARGB(255, 137, 26, 119),
-              backgroundColor: Colors.white,
-            ),
-          );
-        },
-      );
+    //   showDialog(
+    //     context: context,
+    //     builder: (context) {
+    //       return const Center(
+    //         child: CircularProgressIndicator(
+    //           color: Color.fromARGB(255, 137, 26, 119),
+    //           backgroundColor: Colors.white,
+    //         ),
+    //       );
+    //     },
+    //   );
 
-      try {
-        var request = http.MultipartRequest('POST', Uri.parse(url));
+    //   try {
+    //     var request = http.MultipartRequest('POST', Uri.parse(url));
 
-        debugPrint('quantity ${productsCartMain2[i][1]}');
-        debugPrint(widget.address);
-        debugPrint(paymentType);
-        debugPrint(widget.pinCode);
+    //     debugPrint('quantity ${productsCartMain2[i][1]}');
+    //     debugPrint(widget.address);
+    //     debugPrint(paymentType);
+    //     debugPrint(widget.pinCode);
 
-        // request.fields['quantity'] = productsCartMain2[i][1];
-        request.fields['quantity'] = quantityOfFoodsSelected[i].toString();
-        request.fields['delivery_address'] = widget.address;
-        request.fields['payment_type'] = paymentType;
-        request.fields['pincode'] = widget.pinCode;
+    //     // request.fields['quantity'] = productsCartMain2[i][1];
+    //     request.fields['quantity'] = quantityOfFoodsSelected[i].toString();
+    //     request.fields['delivery_address'] = widget.address;
+    //     request.fields['payment_type'] = paymentType;
+    //     request.fields['pincode'] = widget.pinCode;
 
-        var response = await request.send();
+    //     var response = await request.send();
 
-        log(response.toString());
+    //     log(response.toString());
 
-        log(response.statusCode.toString());
-        if (response.statusCode == 200) {
-          String responseBody = await response.stream.bytesToString();
+    //     log(response.statusCode.toString());
+    //     if (response.statusCode == 200) {
+    //       String responseBody = await response.stream.bytesToString();
 
-          responseBody = responseBody.trim().replaceAll('"', '');
+    //       responseBody = responseBody.trim().replaceAll('"', '');
 
-          log('userId $responseBody');
-          log('Payment successfull');
+    //       log('userId $responseBody');
+    //       log('Payment successfull');
 
-          Navigator.pop(context);
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return OrderSuccess();
-          }));
-          // showOrderSuccess();
-        } else {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Check The datas'),
-            ),
-          );
-          log('Failed to post data: ${response.statusCode}');
-        }
-      } catch (e) {
-        log('Exception while posting data: $e');
-      }
-    }
+    //       Navigator.pop(context);
+    //       Navigator.push(context, MaterialPageRoute(builder: (context) {
+    //         return OrderSuccess();
+    //       }));
+    //       // showOrderSuccess();
+    //     } else {
+    //       Navigator.pop(context);
+    //       ScaffoldMessenger.of(context).showSnackBar(
+    //         const SnackBar(
+    //           content: Text('Check The datas'),
+    //         ),
+    //       );
+    //       log('Failed to post data: ${response.statusCode}');
+    //     }
+    //   } catch (e) {
+    //     log('Exception while posting data: $e');
+    //   }
+    // }
 
     // ________________________________________
 
@@ -218,64 +218,64 @@ class _PaymentScreenState extends State<PaymentScreen> {
     //   log('Exception while posting data: $e');
     // }
 
-    // String url =
-    //     'https://${ApiServices.ipAddress}/enduser_order_create/${widget.userId}/${widget.productId}/${widget.category}/';
+    String url =
+        'https://${ApiServices.ipAddress}/enduser_order_create/${widget.userId}/${widget.productId}/${widget.category}/';
 
-    // log(widget.userId);
-    // log(widget.productId);
-    // log(widget.category);
-    // showDialog(
-    //   context: context,
-    //   builder: (context) {
-    //     return const Center(
-    //       child: CircularProgressIndicator(
-    //         color: Color.fromARGB(255, 137, 26, 119),
-    //         backgroundColor: Colors.white,
-    //       ),
-    //     );
-    //   },
-    // );
+    log(widget.userId);
+    log(widget.productId);
+    log(widget.category);
+    showDialog(
+      context: context,
+      builder: (context) {
+        return const Center(
+          child: CircularProgressIndicator(
+            color: Color.fromARGB(255, 137, 26, 119),
+            backgroundColor: Colors.white,
+          ),
+        );
+      },
+    );
 
-    // try {
-    //   var request = http.MultipartRequest('POST', Uri.parse(url));
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse(url));
 
-    //   debugPrint(widget.totalQuantity);
-    //   debugPrint(widget.address);
-    //   debugPrint(paymentType);
-    //   debugPrint(widget.pinCode);
+      debugPrint(widget.totalQuantity);
+      debugPrint(widget.address);
+      debugPrint(paymentType);
+      debugPrint(widget.pinCode);
 
-    //   request.fields['quantity'] = widget.totalQuantity;
-    //   request.fields['delivery_address'] = widget.address;
-    //   request.fields['payment_type'] = paymentType;
-    //   request.fields['pincode'] = widget.pinCode;
+      request.fields['quantity'] = widget.totalQuantity;
+      request.fields['delivery_address'] = widget.address;
+      request.fields['payment_type'] = paymentType;
+      request.fields['pincode'] = widget.pinCode;
 
-    //   var response = await request.send();
+      var response = await request.send();
 
-    //   log(response.toString());
+      log(response.toString());
 
-    //   log(response.statusCode.toString());
-    //   if (response.statusCode == 200) {
-    //     String responseBody = await response.stream.bytesToString();
+      log(response.statusCode.toString());
+      if (response.statusCode == 200) {
+        String responseBody = await response.stream.bytesToString();
 
-    //     responseBody = responseBody.trim().replaceAll('"', '');
+        responseBody = responseBody.trim().replaceAll('"', '');
 
-    //     log('userId $responseBody');
-    //     log('Payment successfull');
+        log('userId $responseBody');
+        log('Payment successfull');
 
-    //     Navigator.pop(context);
-    //     // showOrderSuccess();
-    //   } else {
-    //     Navigator.pop(context);
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(
-    //         content: Text('Check The datas'),
-    //       ),
-    //     );
-    //     log('Failed to post data: ${response.statusCode}');
-    //   }
-    // } catch (e) {
-    //   log('Exception while posting data: $e');
-    // }
+        Navigator.pop(context);
+        // showOrderSuccess();
+      } else {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Check The datas'),
+          ),
+        );
+        log('Failed to post data: ${response.statusCode}');
+      }
+    } catch (e) {
+      log('Exception while posting data: $e');
+    }
   }
 
   void netBanking() async {
@@ -419,7 +419,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    
     productsCartMain2 = context.watch<Fooddata>().productsInMainCart;
 
     // final theme = Theme.of(context).textTheme;
@@ -427,7 +426,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       appBar: AppBar(
         foregroundColor: Colors.white,
         backgroundColor: primaryColor,
-        title: const Text('Payment'),
+        title: const Text('Payment Except Food'),
       ),
       backgroundColor: Colors.white,
       body: Padding(
